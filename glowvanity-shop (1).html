@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glow Vanity — Makeup Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #F7EEEB;
+    --canvas-raised: #FFFBF9;
+    --ink: #2B1B24;
+    --ink-soft: #6B5560;
+    --line: #E7D3D0;
+    --plum: #9C3A5D;
+    --plum-dark: #7C2C49;
+    --gold: #BE9A5F;
+    --card-shadow: rgba(43, 27, 36, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 48px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .wordmark span {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--plum);
+  }
+
+  nav { display: flex; gap: 10px; align-items: center; }
+
+  .cat-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 7px 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--canvas-raised);
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
+  }
+
+  .pill:hover { border-color: var(--plum); color: var(--plum); }
+  .pill.active { background: var(--plum); border-color: var(--plum); color: #fff; }
+
+  .admin-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .admin-btn:hover { background: var(--plum); border-color: var(--plum); }
+
+  main {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 44px 48px 80px;
+  }
+
+  .intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 30px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .intro h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 42px;
+    margin: 0 0 6px;
+    max-width: 560px;
+    line-height: 1.1;
+  }
+
+  .intro h1 em { color: var(--plum); font-style: italic; }
+
+  .intro p {
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 460px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .count-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 2px;
+    white-space: nowrap;
+    background: var(--canvas-raised);
+  }
+
+  .cat-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 26px;
+  }
+
+  .card {
+    background: var(--canvas-raised);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px var(--card-shadow);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 22px var(--card-shadow); }
+
+  .card-img {
+    aspect-ratio: 1 / 1;
+    background: #F0E2DE;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .swatch {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  }
+
+  .card-body {
+    padding: 16px 17px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .card-cat {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .card-desc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    flex: 1;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .card-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--plum-dark);
+  }
+
+  .card-shade-label {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+  }
+
+  .empty h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 24px;
+    margin: 0 0 8px;
+  }
+
+  .empty p { color: var(--ink-soft); font-size: 13px; margin: 0; }
+
+  /* Admin drawer */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43,27,36,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+  }
+
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: -420px;
+    width: 400px;
+    max-width: 90vw;
+    height: 100%;
+    background: var(--canvas-raised);
+    box-shadow: -6px 0 24px rgba(0,0,0,0.15);
+    transition: right 0.25s ease;
+    z-index: 11;
+    overflow-y: auto;
+    padding: 32px;
+  }
+
+  .drawer.show { right: 0; }
+
+  .drawer h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 27px;
+    margin: 0 0 4px;
+  }
+
+  .drawer .sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+  }
+
+  label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+
+  .field { margin-bottom: 15px; }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 10px 11px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  input[type="color"] { padding: 4px; height: 40px; cursor: pointer; }
+
+  textarea { resize: vertical; min-height: 55px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--plum);
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .submit-btn:hover { background: var(--plum-dark); }
+
+  .close-x {
+    position: absolute;
+    top: 28px; right: 28px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 26px 0;
+  }
+
+  .existing-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .mini-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+  }
+
+  .mini-row button {
+    background: none;
+    border: none;
+    color: var(--plum);
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-decoration: underline;
+  }
+
+  .status-msg {
+    font-size: 12px;
+    margin-top: 10px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 640px) {
+    header { flex-direction: column; align-items: flex-start; gap: 14px; padding: 20px 24px; }
+    main { padding: 30px 24px; }
+    .intro h1 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Glow <span>Vanity</span></div>
+  <nav>
+    <button class="admin-btn" id="adminToggle" style="display:none;">+ Add Product</button>
+  </nav>
+</header>
+
+<main>
+  <div class="intro">
+    <div>
+      <h1>Colour, curated <em>by you</em>.</h1>
+      <p>A full shelf to start with — add, edit, or clear it out and build your own from scratch anytime.</p>
+    </div>
+    <div class="count-tag" id="countTag">0 products</div>
+  </div>
+
+  <div class="cat-row" id="catRow"></div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer style="text-align:center; padding: 30px 20px 50px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);">
+  <a href="#" id="ownerLoginLink" style="color:var(--ink-soft); text-decoration:underline; cursor:pointer;">Store owner sign in</a>
+</footer>
+
+<div class="overlay" id="loginOverlay"></div>
+<div class="drawer" id="loginDrawer" style="width:340px;">
+  <button class="close-x" id="closeLoginDrawer">✕</button>
+  <h2>Store owner sign in</h2>
+  <div class="sub">Enter your access code to edit products.</div>
+  <div class="field">
+    <label>Access code</label>
+    <input type="password" id="ownerPassword" placeholder="••••••••">
+  </div>
+  <button class="submit-btn" id="ownerLoginSubmit">Sign in</button>
+  <div class="status-msg" id="loginStatusMsg"></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <button class="close-x" id="closeDrawer">✕</button>
+  <h2>Add a product</h2>
+  <div class="sub">Fill this out and it lands on the shelf right away.</div>
+
+  <form id="productForm">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="f-name" placeholder="Velvet Matte Lipstick" required>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Price (Rs.)</label>
+        <input type="number" id="f-price" placeholder="1800" min="0" step="1" required>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <input type="text" id="f-category" placeholder="Lipstick" required>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Shade name</label>
+        <input type="text" id="f-shadename" placeholder="Rosewood">
+      </div>
+      <div class="field">
+        <label>Shade colour</label>
+        <input type="color" id="f-shade" value="#B5646E">
+      </div>
+    </div>
+    <div class="field">
+      <label>Image URL</label>
+      <input type="text" id="f-image" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="A short line about finish, coverage, or wear time."></textarea>
+    </div>
+    <button type="submit" class="submit-btn">Add to shelf</button>
+    <div class="status-msg" id="statusMsg"></div>
+  </form>
+
+  <hr class="divider">
+  <div class="existing-title">Currently on the shelf</div>
+  <div id="miniList"></div>
+</div>
+
+<script>
+const grid = document.getElementById('grid');
+const catRow = document.getElementById('catRow');
+const countTag = document.getElementById('countTag');
+const miniList = document.getElementById('miniList');
+const overlay = document.getElementById('overlay');
+const drawer = document.getElementById('drawer');
+const adminToggle = document.getElementById('adminToggle');
+const closeDrawer = document.getElementById('closeDrawer');
+const form = document.getElementById('productForm');
+const statusMsg = document.getElementById('statusMsg');
+
+let products = [];
+let activeCategory = 'All';
+const STORAGE_KEY = 'glowvanity:products';
+
+const SAMPLE_PRODUCTS = [
+  { name: 'Velvet Matte Lipstick', price: '1800', category: 'Lipstick', shadeName: 'Rosewood', shade: '#A8425A', image: '', description: 'Long-wear matte finish with a soft, non-drying texture that lasts through meals and coffee.' },
+  { name: 'Rouge Kiss Lip Gloss', price: '1200', category: 'Lip Gloss', shadeName: 'Sheer Berry', shade: '#C25C74', image: '', description: 'High-shine, non-sticky gloss with a hint of colour and a plumping feel.' },
+  { name: 'Silk Finish Foundation', price: '2600', category: 'Foundation', shadeName: 'Warm Beige', shade: '#D9AE85', image: '', description: 'Buildable medium coverage that evens tone without masking your skin.' },
+  { name: 'Featherlight Concealer', price: '1600', category: 'Concealer', shadeName: 'Light Neutral', shade: '#E6C29E', image: '', description: 'Brightens under-eyes and covers redness without settling into fine lines.' },
+  { name: 'Petal Flush Blush', price: '1450', category: 'Blush', shadeName: 'Peony', shade: '#D97C93', image: '', description: 'A soft, buildable flush that mimics a natural, healthy glow.' },
+  { name: 'Sunset Eyeshadow Palette', price: '3200', category: 'Eyeshadow', shadeName: '9-Shade Warm', shade: '#B5734A', image: '', description: 'Matte and shimmer shades in warm terracotta and bronze tones, blends effortlessly.' },
+  { name: 'Curl & Hold Mascara', price: '1350', category: 'Mascara', shadeName: 'Jet Black', shade: '#231F20', image: '', description: 'Lifts and curls lashes with a smudge-proof, flake-free formula all day.' },
+  { name: 'Moonlight Highlighter', price: '1900', category: 'Highlighter', shadeName: 'Champagne', shade: '#E3C88A', image: '', description: 'A fine, glass-like shimmer for cheekbones, brow bone, and collarbones.' },
+  { name: 'All-Day Setting Spray', price: '2100', category: 'Setting Spray', shadeName: 'Universal', shade: '#CFE0DB', image: '', description: 'A weightless mist that locks makeup in place through heat and humidity.' }
+];
+
+/* ---- Inline SVG product icons (no external network calls, never fail to load) ---- */
+function adjustColor(hex, amt) {
+  hex = (hex || '#B5646E').replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const num = parseInt(hex, 16);
+  let r = Math.min(255, Math.max(0, ((num >> 16) & 255) + amt));
+  let g = Math.min(255, Math.max(0, ((num >> 8) & 255) + amt));
+  let b = Math.min(255, Math.max(0, (num & 255) + amt));
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function svgToDataUri(svg) {
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+function generateProductIcon(category, shadeHex) {
+  const shade = shadeHex || '#A8425A';
+  const light = adjustColor(shade, 45);
+  const dark = adjustColor(shade, -45);
+  const bg = '#F0E2DE';
+  const cat = (category || '').toLowerCase();
+  let art = '';
+
+  if (cat.includes('lipstick')) {
+    art = `
+      <rect x="150" y="90" width="100" height="60" rx="10" fill="${dark}"/>
+      <polygon points="150,90 250,90 235,40 165,40" fill="${shade}"/>
+      <polygon points="165,40 235,40 210,10 190,10" fill="${light}"/>
+      <rect x="140" y="150" width="120" height="180" rx="14" fill="#3A2E33"/>
+      <rect x="140" y="150" width="120" height="16" fill="#2B2226"/>`;
+  } else if (cat.includes('gloss')) {
+    art = `
+      <rect x="165" y="60" width="70" height="160" rx="30" fill="${light}" fill-opacity="0.5" stroke="${dark}" stroke-width="4"/>
+      <ellipse cx="200" cy="90" rx="22" ry="30" fill="${shade}"/>
+      <rect x="180" y="210" width="40" height="120" rx="10" fill="${dark}"/>
+      <rect x="185" y="330" width="30" height="30" rx="6" fill="${shade}"/>`;
+  } else if (cat.includes('foundation') || cat.includes('setting') || cat.includes('spray')) {
+    art = `
+      <rect x="140" y="120" width="120" height="200" rx="16" fill="#E7DCD3" stroke="${dark}" stroke-width="4"/>
+      <rect x="170" y="70" width="60" height="60" rx="8" fill="${dark}"/>
+      <rect x="185" y="40" width="30" height="40" rx="6" fill="${shade}"/>
+      <circle cx="200" cy="220" r="26" fill="${shade}"/>`;
+  } else if (cat.includes('concealer') || cat.includes('mascara')) {
+    art = `
+      <rect x="172" y="60" width="56" height="230" rx="20" fill="${dark}"/>
+      <rect x="172" y="60" width="56" height="70" rx="20" fill="${shade}"/>
+      <rect x="185" y="20" width="30" height="45" rx="8" fill="#3A2E33"/>`;
+  } else if (cat.includes('blush') || cat.includes('highlight')) {
+    art = `
+      <rect x="90" y="150" width="220" height="150" rx="18" fill="#E7DCD3" stroke="${dark}" stroke-width="4"/>
+      <circle cx="200" cy="150" r="110" fill="#EDE2D8" stroke="${dark}" stroke-width="4"/>
+      <circle cx="200" cy="150" r="70" fill="${shade}"/>
+      ${cat.includes('highlight') ? `
+      <polygon points="150,100 156,116 172,122 156,128 150,144 144,128 128,122 144,116" fill="${light}" fill-opacity="0.9"/>
+      <polygon points="240,170 244,182 256,186 244,190 240,202 236,190 224,186 236,182" fill="${light}" fill-opacity="0.9"/>` : ''}`;
+  } else if (cat.includes('eyeshadow') || cat.includes('palette')) {
+    const s2 = adjustColor(shade, 25);
+    const s3 = adjustColor(shade, -25);
+    const s4 = adjustColor(shade, -60);
+    art = `
+      <rect x="80" y="110" width="240" height="180" rx="14" fill="#3A2E33"/>
+      <rect x="100" y="130" width="90" height="70" rx="6" fill="${shade}"/>
+      <rect x="210" y="130" width="90" height="70" rx="6" fill="${s2}"/>
+      <rect x="100" y="210" width="90" height="60" rx="6" fill="${s3}"/>
+      <rect x="210" y="210" width="90" height="60" rx="6" fill="${s4}"/>`;
+  } else {
+    art = `
+      <rect x="150" y="110" width="100" height="180" rx="16" fill="#E7DCD3" stroke="${dark}" stroke-width="4"/>
+      <rect x="165" y="80" width="70" height="40" rx="8" fill="${dark}"/>
+      <circle cx="200" cy="200" r="34" fill="${shade}"/>`;
+  }
+
+  return svgToDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="${bg}"/>${art}</svg>`);
+}
+
+const OWNER_PASSCODE = 'glow2026';
+let isOwner = false;
+
+const loginOverlay = document.getElementById('loginOverlay');
+const loginDrawer = document.getElementById('loginDrawer');
+const ownerLoginLink = document.getElementById('ownerLoginLink');
+const closeLoginDrawer = document.getElementById('closeLoginDrawer');
+const ownerPassword = document.getElementById('ownerPassword');
+const ownerLoginSubmit = document.getElementById('ownerLoginSubmit');
+const loginStatusMsg = document.getElementById('loginStatusMsg');
+
+function openLoginDrawer() { loginOverlay.classList.add('show'); loginDrawer.classList.add('show'); }
+function shutLoginDrawer() { loginOverlay.classList.remove('show'); loginDrawer.classList.remove('show'); loginStatusMsg.textContent = ''; ownerPassword.value = ''; }
+
+ownerLoginLink.addEventListener('click', (e) => { e.preventDefault(); openLoginDrawer(); });
+closeLoginDrawer.addEventListener('click', shutLoginDrawer);
+loginOverlay.addEventListener('click', shutLoginDrawer);
+
+ownerLoginSubmit.addEventListener('click', () => {
+  if (ownerPassword.value === OWNER_PASSCODE) {
+    isOwner = true;
+    adminToggle.style.display = 'inline-block';
+    shutLoginDrawer();
+    openDrawer();
+  } else {
+    loginStatusMsg.textContent = 'Wrong code — try again.';
+  }
+});
+
+ownerPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') ownerLoginSubmit.click(); });
+
+function openDrawer() { overlay.classList.add('show'); drawer.classList.add('show'); }
+function shutDrawer() { overlay.classList.remove('show'); drawer.classList.remove('show'); }
+adminToggle.addEventListener('click', openDrawer);
+closeDrawer.addEventListener('click', shutDrawer);
+overlay.addEventListener('click', shutDrawer);
+
+function placeholderImg(category, shade) {
+  return generateProductIcon(category, shade);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+function getCategories() {
+  const cats = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
+  return ['All', ...cats];
+}
+
+function renderCategoryPills() {
+  const cats = getCategories();
+  catRow.innerHTML = '';
+  cats.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'pill' + (cat === activeCategory ? ' active' : '');
+    pill.textContent = cat;
+    pill.addEventListener('click', () => { activeCategory = cat; render(); });
+    catRow.appendChild(pill);
+  });
+}
+
+function render() {
+  renderCategoryPills();
+  const visible = activeCategory === 'All' ? products : products.filter(p => p.category === activeCategory);
+
+  grid.innerHTML = '';
+  countTag.textContent = products.length === 1 ? '1 product' : `${products.length} products`;
+
+  if (visible.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <h3>Nothing here yet</h3>
+        <p>Click "+ Add Product" above to add your first item.</p>
+      </div>`;
+  } else {
+    visible.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-img">
+          <img src="${p.image && p.image.trim() ? p.image : placeholderImg(p.category, p.shade)}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null;this.src='${placeholderImg(p.category, p.shade)}'">
+          ${p.shade ? `<div class="swatch" style="background:${p.shade}"></div>` : ''}
+        </div>
+        <div class="card-body">
+          <div class="card-cat">${escapeHtml(p.category || 'Uncategorized')}</div>
+          <div class="card-name">${escapeHtml(p.name)}</div>
+          <div class="card-desc">${escapeHtml(p.description || '')}</div>
+          <div class="card-footer">
+            <div class="card-price">Rs. ${Number(p.price).toLocaleString()}</div>
+            <div class="card-shade-label">${escapeHtml(p.shadeName || '')}</div>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  renderMiniList();
+}
+
+function renderMiniList() {
+  miniList.innerHTML = '';
+  if (products.length === 0) {
+    miniList.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);">Nothing added yet.</div>';
+    return;
+  }
+  products.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'mini-row';
+    row.innerHTML = `<span>${escapeHtml(p.name)}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = 'Remove';
+    btn.addEventListener('click', () => removeProduct(i));
+    row.appendChild(btn);
+    miniList.appendChild(row);
+  });
+}
+
+async function saveProducts() {
+  try {
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(products), true);
+    if (!result) {
+      statusMsg.textContent = 'Could not save — please try again.';
+      return false;
+    }
+    return true;
+  } catch (e) {
+    statusMsg.textContent = 'Could not save — please try again.';
+    return false;
+  }
+}
+
+async function loadProducts() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, true);
+    products = result ? JSON.parse(result.value) : [];
+  } catch (e) {
+    products = [];
+  }
+  if (products.length === 0) {
+    products = SAMPLE_PRODUCTS.slice();
+    await saveProducts();
+  }
+  render();
+}
+
+async function removeProduct(index) {
+  products.splice(index, 1);
+  render();
+  await saveProducts();
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('f-name').value.trim();
+  const price = document.getElementById('f-price').value;
+  const category = document.getElementById('f-category').value.trim();
+  const shadeName = document.getElementById('f-shadename').value.trim();
+  const shade = document.getElementById('f-shade').value;
+  const image = document.getElementById('f-image').value.trim();
+  const description = document.getElementById('f-desc').value.trim();
+
+  if (!name || !price || !category) {
+    statusMsg.textContent = 'Name, price, and category are required.';
+    return;
+  }
+
+  products.push({ name, price, category, shadeName, shade, image, description });
+  render();
+  statusMsg.textContent = 'Saving...';
+  const ok = await saveProducts();
+  statusMsg.textContent = ok ? 'Added to the shelf.' : statusMsg.textContent;
+  form.reset();
+  document.getElementById('f-shade').value = '#B5646E';
+});
+
+loadProducts();
+</script>
+
+</body>
+</html>
